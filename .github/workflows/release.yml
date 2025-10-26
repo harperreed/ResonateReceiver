@@ -14,16 +14,13 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v4
 
-            - name: Install xcodegen
-              run: brew install xcodegen
-
-            - name: Generate Xcode project
-              run: xcodegen generate
-
             - name: Setup Xcode
               uses: maxim-lobanov/setup-xcode@v1
               with:
                   xcode-version: latest-stable
+
+            - name: Resolve dependencies
+              run: swift package resolve
 
             - name: Run tests
               run: swift test
@@ -50,19 +47,41 @@ jobs:
                   security list-keychains -d user -s "$KEYCHAIN_PATH"
                   rm certificate.p12
 
-            - name: Build and sign app
+            - name: Build release binary
+              run: |
+                  swift build -c release
+
+            - name: Create and sign app bundle
               env:
                   TEAM_ID: ${{ secrets.TEAM_ID }}
               run: |
-                  xcodebuild -project ResonateReceiver.xcodeproj \
-                    -scheme ResonateReceiver \
-                    -configuration Release \
-                    -derivedDataPath build \
-                    -onlyUsePackageVersionsFromResolvedFile \
-                    CODE_SIGN_IDENTITY="Developer ID Application" \
-                    DEVELOPMENT_TEAM="$TEAM_ID" \
-                    CODE_SIGN_STYLE=Manual \
-                    clean build
+                  # Create app bundle structure
+                  mkdir -p ResonateReceiver.app/Contents/MacOS
+                  mkdir -p ResonateReceiver.app/Contents/Resources
+                  mkdir -p ResonateReceiver.app/Contents/Frameworks
+
+                  # Copy executable
+                  cp .build/release/ResonateReceiver ResonateReceiver.app/Contents/MacOS/
+
+                  # Copy Info.plist
+                  cp Info.plist ResonateReceiver.app/Contents/
+
+                  # Create PkgInfo
+                  echo "APPL????" > ResonateReceiver.app/Contents/PkgInfo
+
+                  # Copy frameworks if they exist
+                  if [ -d .build/release/FLAC.framework ]; then
+                      cp -R .build/release/FLAC.framework ResonateReceiver.app/Contents/Frameworks/
+                  fi
+                  if [ -d .build/release/ogg.framework ]; then
+                      cp -R .build/release/ogg.framework ResonateReceiver.app/Contents/Frameworks/
+                  fi
+
+                  # Sign the app bundle
+                  codesign --force --deep --sign "Developer ID Application" \
+                    --options runtime \
+                    --entitlements entitlements.plist \
+                    ResonateReceiver.app
 
             - name: Create DMG
               run: ./scripts/create-dmg.sh
