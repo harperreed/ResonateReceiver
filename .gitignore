@@ -5,3 +5,7 @@ xcuserdata/
 DerivedData/
 .swiftpm/
 *.xcodeproj
+
+# App bundle
+ResonateReceiver.app/
+generate_xcodeproj.rb
