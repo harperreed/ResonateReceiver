@@ -11,11 +11,12 @@ import Foundation
 @main
 struct TestRunner {
     static func main() {
-        print("Running all model tests...\n")
+        print("Running all tests...\n")
 
         do {
             try runServerConfigTests()
             runTrackMetadataTests()
+            runSettingsManagerTests()
             print("\n✅ All tests passed!")
         } catch {
             print("\n❌ Test failed with error: \(error)")

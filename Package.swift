@@ -19,7 +19,8 @@ let package = Package(
         .target(
             name: "ResonateReceiver",
             dependencies: ["ResonateKit"],
-            path: "Sources/Models"
+            path: "Sources",
+            exclude: ["App"]
         ),
         .executableTarget(
             name: "ResonateReceiverApp",
