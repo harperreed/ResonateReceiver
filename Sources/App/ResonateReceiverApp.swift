@@ -1,15 +1,31 @@
 // ABOUTME: Main application entry point
-// ABOUTME: Sets up SwiftUI app lifecycle and menubar mode
+// ABOUTME: Bootstraps AppKit application with menubar-only mode
 
-import SwiftUI
+import AppKit
 
 @main
-struct ResonateReceiverApp: App {
-    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+struct ResonateReceiverApp {
+    static func main() {
+        print("⭐️ main() started")
+        fflush(stdout)
 
-    var body: some Scene {
-        Settings {
-            EmptyView()
-        }
+        let app = NSApplication.shared
+        print("⭐️ NSApplication.shared acquired")
+        fflush(stdout)
+
+        // Set activation policy BEFORE assigning delegate
+        app.setActivationPolicy(.accessory)
+        print("⭐️ Activation policy set to accessory")
+        fflush(stdout)
+
+        let delegate = AppDelegate()
+        print("⭐️ AppDelegate created")
+        fflush(stdout)
+
+        app.delegate = delegate
+        print("⭐️ Delegate assigned, about to call app.run()")
+        fflush(stdout)
+
+        app.run()
     }
 }

@@ -17,19 +17,19 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "ResonateReceiver",
+            name: "ResonateReceiverLib",
             dependencies: ["ResonateKit"],
             path: "Sources",
             exclude: ["App"]
         ),
         .executableTarget(
             name: "ResonateReceiverApp",
-            dependencies: ["ResonateReceiver"],
+            dependencies: ["ResonateReceiverLib"],
             path: "Sources/App"
         ),
         .executableTarget(
             name: "ResonateReceiverTests",
-            dependencies: ["ResonateReceiver"],
+            dependencies: ["ResonateReceiverLib"],
             path: "Tests"
         )
     ]

@@ -12,33 +12,47 @@ public class MenuBarController: NSObject {
     private let settingsManager: SettingsManager
 
     public override init() {
+        print("🟢 MenuBarController: init started")
+
         // Create managers
         resonateManager = ResonateManager()
         settingsManager = SettingsManager()
+        print("🟢 MenuBarController: Managers created")
 
         // Create status bar item
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+        print("🟢 MenuBarController: StatusItem created: \(statusItem)")
 
         // Create popover
         popover = NSPopover()
         popover.contentSize = NSSize(width: 350, height: 500)
         popover.behavior = .semitransient
+        print("🟢 MenuBarController: Popover created")
 
         super.init()
 
         setupStatusItem()
         setupPopover()
+        print("🟢 MenuBarController: init complete")
     }
 
     private func setupStatusItem() {
-        guard let button = statusItem.button else { return }
+        print("🟢 MenuBarController: setupStatusItem called")
+        guard let button = statusItem.button else {
+            print("🔴 MenuBarController: ERROR - statusItem.button is nil!")
+            return
+        }
+        print("🟢 MenuBarController: StatusItem button exists")
 
         button.image = NSImage(
             systemSymbolName: "waveform.circle",
             accessibilityDescription: "Resonate Receiver"
         )
+        print("🟢 MenuBarController: Button image set")
+
         button.action = #selector(togglePopover)
         button.target = self
+        print("🟢 MenuBarController: Button action and target set")
     }
 
     private func setupPopover() {

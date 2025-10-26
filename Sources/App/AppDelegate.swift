@@ -2,17 +2,19 @@
 // ABOUTME: Configures app as accessory (menubar-only, no dock icon)
 
 import AppKit
-import ResonateReceiver
+import ResonateReceiverLib
 
 class AppDelegate: NSObject, NSApplicationDelegate {
     var menuBarController: MenuBarController?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        // Hide dock icon - menubar only
-        NSApp.setActivationPolicy(.accessory)
+        print("🔵 AppDelegate: applicationDidFinishLaunching called")
+        fflush(stdout)
 
         // Create menubar controller
         menuBarController = MenuBarController()
+        print("🔵 AppDelegate: MenuBarController created")
+        fflush(stdout)
     }
 
     func applicationWillTerminate(_ notification: Notification) {

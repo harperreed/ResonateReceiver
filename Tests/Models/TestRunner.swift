@@ -2,7 +2,7 @@
 // ABOUTME: Executes all test suites and reports results
 
 import Foundation
-@testable import ResonateReceiver
+@testable import ResonateReceiverLib
 
 // NOTE: Custom test runner approach used due to CommandLineTools SDK limitations
 // XCTest is not available in the CommandLineTools SDK, so we use simple assert-based
