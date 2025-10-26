@@ -98,14 +98,25 @@ public struct ContentView: View {
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
 
-            // Show connect button if server is configured
-            if let serverConfig = settingsManager.serverConfig {
+            // Show connect button based on configuration mode
+            if settingsManager.enableAutoDiscovery {
+                // Auto-discovery mode - no manual connect button yet
+                // TODO: Show discovered servers list when ResonateKit integration is complete
+                Text("Auto-discovery enabled\nConfigure manually in Settings if needed")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .italic()
+                    .multilineTextAlignment(.center)
+                    .padding(.top, 8)
+            } else if let serverConfig = settingsManager.serverConfig {
+                // Manual mode with server configured
                 Button("Connect to \(serverConfig.name ?? serverConfig.hostname)") {
                     resonateManager.connect(to: serverConfig)
                 }
                 .buttonStyle(.borderedProminent)
                 .padding(.top, 8)
             } else {
+                // Manual mode but no server configured
                 Text("Configure a server in Settings")
                     .font(.caption)
                     .foregroundColor(.secondary)
