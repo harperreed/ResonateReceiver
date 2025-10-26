@@ -6,7 +6,7 @@ import Foundation
 @MainActor
 public class SettingsManager: ObservableObject {
     @Published public var serverConfig: ServerConfig?
-    @Published public var enableAutoDiscovery: Bool = true
+    @Published public var enableAutoDiscovery: Bool = false
 
     private let defaults = UserDefaults.standard
     private let serverConfigKey = "resonateServerConfig"
@@ -23,8 +23,8 @@ public class SettingsManager: ObservableObject {
         if defaults.object(forKey: autoDiscoveryKey) != nil {
             enableAutoDiscovery = defaults.bool(forKey: autoDiscoveryKey)
         } else {
-            // Default to true if never set
-            enableAutoDiscovery = true
+            // Default to false (manual mode) until auto-discovery is fully integrated
+            enableAutoDiscovery = false
         }
     }
 

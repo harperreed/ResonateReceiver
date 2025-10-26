@@ -8,11 +8,11 @@ public struct SettingsView: View {
     @Environment(\.dismiss) var dismiss
 
     @State private var hostname: String = ""
-    @State private var port: String = "8080"
+    @State private var port: String = "8927"
     @State private var serverName: String = ""
-    @State private var enableAutoDiscovery: Bool = true
+    @State private var enableAutoDiscovery: Bool = false
     @State private var validationError: String?
-    @State private var originalAutoDiscovery: Bool = true
+    @State private var originalAutoDiscovery: Bool = false
 
     public init(settingsManager: SettingsManager) {
         self.settingsManager = settingsManager
