@@ -1,7 +1,7 @@
 // ABOUTME: Track metadata model from Resonate server
 // ABOUTME: Represents currently playing track information
 
-import AppKit
+import Foundation
 
 struct TrackMetadata: Equatable {
     let title: String?

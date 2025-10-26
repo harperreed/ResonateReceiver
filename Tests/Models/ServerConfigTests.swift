@@ -4,7 +4,9 @@
 import Foundation
 @testable import ResonateReceiver
 
-// Simple test runner since XCTest is not available in CommandLineTools SDK
+// NOTE: Custom test runner approach used due to CommandLineTools SDK limitations
+// XCTest is not available in the CommandLineTools SDK, so we use simple assert-based
+// tests with a manual runner. Tests are executed during build and fail the build on errors.
 func testCodable() throws {
     let config = ServerConfig(
         hostname: "192.168.1.100",
@@ -34,12 +36,8 @@ func testPortValidation() {
     print("✓ testPortValidation passed")
 }
 
-// Run tests
-do {
+func runServerConfigTests() throws {
     try testCodable()
     testPortValidation()
-    print("\n✅ All ServerConfig tests passed!")
-} catch {
-    print("\n❌ Test failed with error: \(error)")
-    exit(1)
+    print("✅ All ServerConfig tests passed!")
 }
