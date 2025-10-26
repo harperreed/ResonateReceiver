@@ -9,22 +9,30 @@ let package = Package(
     products: [
         .executable(
             name: "ResonateReceiver",
-            targets: ["ResonateReceiver"]
+            targets: ["ResonateReceiverApp"]
         )
     ],
     dependencies: [
         .package(url: "https://github.com/harperreed/ResonateKit", branch: "main")
     ],
     targets: [
-        .executableTarget(
+        .target(
             name: "ResonateReceiver",
             dependencies: ["ResonateKit"],
-            path: "Sources"
+            path: "Sources/Models"
         ),
-        .testTarget(
+        .executableTarget(
+            name: "ResonateReceiverApp",
+            dependencies: ["ResonateReceiver"],
+            path: "Sources/App"
+        ),
+        .executableTarget(
             name: "ResonateReceiverTests",
             dependencies: ["ResonateReceiver"],
-            path: "Tests"
+            path: "Tests/Models",
+            linkerSettings: [
+                .unsafeFlags(["-Xlinker", "-no_application_extension"])
+            ]
         )
     ]
 )
