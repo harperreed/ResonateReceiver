@@ -6,8 +6,8 @@ import MediaPlayer
 import AppKit
 
 @MainActor
-class MediaControlsManager {
-    static let shared = MediaControlsManager()
+public class MediaControlsManager {
+    public static let shared = MediaControlsManager()
 
     private let nowPlayingCenter = MPNowPlayingInfoCenter.default()
     private let commandCenter = MPRemoteCommandCenter.shared()
@@ -24,7 +24,7 @@ class MediaControlsManager {
         commandCenter.previousTrackCommand.isEnabled = false
     }
 
-    func updateNowPlaying(metadata: TrackMetadata, artwork: NSImage?) {
+    public func updateNowPlaying(metadata: TrackMetadata, artwork: NSImage?) {
         var nowPlayingInfo: [String: Any] = [:]
 
         if let title = metadata.title {
@@ -53,7 +53,7 @@ class MediaControlsManager {
         nowPlayingCenter.nowPlayingInfo = nowPlayingInfo
     }
 
-    func clearNowPlaying() {
+    public func clearNowPlaying() {
         nowPlayingCenter.nowPlayingInfo = nil
     }
 }

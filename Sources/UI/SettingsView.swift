@@ -72,7 +72,7 @@ public struct SettingsView: View {
                     saveSettings()
                 }
                 .keyboardShortcut(.defaultAction)
-                .disabled(enableAutoDiscovery || !isValid())
+                .disabled(enableAutoDiscovery || hostname.isEmpty || port.isEmpty)
             }
         }
         .padding()
@@ -92,7 +92,7 @@ public struct SettingsView: View {
         }
     }
 
-    private func isValid() -> Bool {
+    private func validateAndSave() -> Bool {
         validationError = nil
 
         guard !hostname.isEmpty else {
@@ -105,12 +105,6 @@ public struct SettingsView: View {
             return false
         }
 
-        return true
-    }
-
-    private func saveSettings() {
-        guard isValid(), let portInt = Int(port) else { return }
-
         let config = ServerConfig(
             hostname: hostname,
             port: portInt,
@@ -118,6 +112,11 @@ public struct SettingsView: View {
         )
 
         settingsManager.saveServerConfig(config)
+        return true
+    }
+
+    private func saveSettings() {
+        guard validateAndSave() else { return }
         dismiss()
     }
 }

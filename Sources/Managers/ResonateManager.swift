@@ -45,6 +45,7 @@ public class ResonateManager: ObservableObject {
         // TODO: Apply to audio output
     }
 
+    // TODO: Call this method when ResonateKit provides metadata updates
     private func updateMetadata(_ metadata: TrackMetadata) {
         currentMetadata = metadata
         mediaControls.updateNowPlaying(metadata: metadata, artwork: nil)

@@ -97,6 +97,21 @@ public struct ContentView: View {
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
+
+            // Show connect button if server is configured
+            if let serverConfig = settingsManager.serverConfig {
+                Button("Connect to \(serverConfig.name ?? serverConfig.hostname)") {
+                    resonateManager.connect(to: serverConfig)
+                }
+                .buttonStyle(.borderedProminent)
+                .padding(.top, 8)
+            } else {
+                Text("Configure a server in Settings")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .italic()
+                    .padding(.top, 8)
+            }
         }
         .frame(maxHeight: .infinity)
         .padding()
@@ -128,11 +143,20 @@ public struct ContentView: View {
                     .frame(width: 40, alignment: .trailing)
             }
 
-            // Settings button
-            Button("Settings") {
-                showingSettings = true
+            // Settings and disconnect buttons
+            HStack {
+                Button("Settings") {
+                    showingSettings = true
+                }
+                .buttonStyle(.bordered)
+
+                if resonateManager.isConnected {
+                    Button("Disconnect") {
+                        resonateManager.disconnect()
+                    }
+                    .buttonStyle(.bordered)
+                }
             }
-            .buttonStyle(.bordered)
         }
         .padding()
     }
