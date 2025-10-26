@@ -46,7 +46,7 @@ jobs:
 
             - name: Build release binary
               run: |
-                  swift build -c release
+                  swift build -c release --product ResonateReceiver
 
             - name: Create and sign app bundle
               env:
