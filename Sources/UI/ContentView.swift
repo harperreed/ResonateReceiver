@@ -61,12 +61,28 @@ public struct ContentView: View {
     private var playbackSection: some View {
         VStack(spacing: 16) {
             // Album art
-            Image(systemName: "music.note")
-                .font(.system(size: 120))
-                .foregroundColor(.secondary)
-                .frame(width: 300, height: 300)
-                .background(Color.secondary.opacity(0.1))
-                .cornerRadius(8)
+            if let artworkUrl = resonateManager.currentMetadata?.artworkUrl,
+               let url = URL(string: artworkUrl) {
+                AsyncImage(url: url) { phase in
+                    switch phase {
+                    case .empty:
+                        ProgressView()
+                            .frame(width: 300, height: 300)
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 300, height: 300)
+                            .cornerRadius(8)
+                    case .failure:
+                        placeholderArtwork
+                    @unknown default:
+                        placeholderArtwork
+                    }
+                }
+            } else {
+                placeholderArtwork
+            }
 
             // Metadata
             VStack(spacing: 4) {
@@ -85,6 +101,15 @@ public struct ContentView: View {
             .padding(.horizontal)
         }
         .padding()
+    }
+
+    private var placeholderArtwork: some View {
+        Image(systemName: "music.note")
+            .font(.system(size: 120))
+            .foregroundColor(.secondary)
+            .frame(width: 300, height: 300)
+            .background(Color.secondary.opacity(0.1))
+            .cornerRadius(8)
     }
 
     private var disconnectedSection: some View {

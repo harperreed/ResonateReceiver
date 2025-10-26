@@ -26,7 +26,7 @@ public class MenuBarController: NSObject {
         // Create popover
         popover = NSPopover()
         popover.contentSize = NSSize(width: 350, height: 500)
-        popover.behavior = .semitransient
+        popover.behavior = .transient
         print("🟢 MenuBarController: Popover created")
 
         super.init()

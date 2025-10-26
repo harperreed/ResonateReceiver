@@ -4,6 +4,7 @@
 import Foundation
 import Combine
 import ResonateKit
+import UserNotifications
 
 @MainActor
 public class ResonateManager: ObservableObject {
@@ -18,9 +19,99 @@ public class ResonateManager: ObservableObject {
 
     private var client: ResonateClient?
     private var eventTask: Task<Void, Never>?
+    private var notificationPermissionRequested = false
 
     public init() {
         print("🟢 ResonateManager: init")
+    }
+
+    private func showTrackNotification(metadata: TrackMetadata) {
+        let center = UNUserNotificationCenter.current()
+
+        // Request permission if not already requested
+        if !notificationPermissionRequested {
+            notificationPermissionRequested = true
+            center.requestAuthorization(options: [.alert, .sound]) { granted, error in
+                if let error = error {
+                    print("🔴 ResonateManager: Notification permission error: \(error)")
+                    return
+                }
+                if granted {
+                    print("🟢 ResonateManager: Notification permission granted")
+                    self.postNotification(metadata: metadata)
+                }
+            }
+        } else {
+            center.getNotificationSettings { settings in
+                if settings.authorizationStatus == .authorized {
+                    self.postNotification(metadata: metadata)
+                }
+            }
+        }
+    }
+
+    private func postNotification(metadata: TrackMetadata) {
+        let content = UNMutableNotificationContent()
+        content.title = metadata.title ?? "Unknown Track"
+        if let artist = metadata.artist {
+            content.body = artist
+        }
+        if let album = metadata.album, content.body.isEmpty {
+            content.body = album
+        } else if let album = metadata.album {
+            content.body += " • \(album)"
+        }
+        content.sound = .default
+
+        // Try to attach artwork if available
+        if let artworkUrlString = metadata.artworkUrl,
+           let artworkUrl = URL(string: artworkUrlString) {
+            Task {
+                do {
+                    let (data, _) = try await URLSession.shared.data(from: artworkUrl)
+                    let tempDir = FileManager.default.temporaryDirectory
+                    let imageFile = tempDir.appendingPathComponent(UUID().uuidString + ".jpg")
+                    try data.write(to: imageFile)
+
+                    let attachment = try UNNotificationAttachment(identifier: "artwork", url: imageFile)
+                    content.attachments = [attachment]
+
+                    let request = UNNotificationRequest(
+                        identifier: UUID().uuidString,
+                        content: content,
+                        trigger: nil
+                    )
+
+                    UNUserNotificationCenter.current().add(request) { error in
+                        if let error = error {
+                            print("🔴 ResonateManager: Failed to show notification: \(error)")
+                        }
+                        // Clean up temp file
+                        try? FileManager.default.removeItem(at: imageFile)
+                    }
+                } catch {
+                    print("🔴 ResonateManager: Failed to download artwork: \(error)")
+                    // Fall back to notification without artwork
+                    self.sendNotificationWithoutArtwork(content: content)
+                }
+            }
+        } else {
+            sendNotificationWithoutArtwork(content: content)
+        }
+    }
+
+    private func sendNotificationWithoutArtwork(content: UNMutableNotificationContent) {
+        let request = UNNotificationRequest(
+            identifier: UUID().uuidString,
+            content: content,
+            trigger: nil
+        )
+
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("🔴 ResonateManager: Failed to show notification: \(error)")
+            }
+        }
     }
 
     public func connect(to server: ServerConfig) {
@@ -149,15 +240,22 @@ public class ResonateManager: ObservableObject {
 
         case let .metadataReceived(metadata):
             print("🟢 ResonateManager: Metadata received: \(metadata.title ?? "unknown")")
+            if let artworkUrl = metadata.artworkUrl {
+                print("🟢 ResonateManager: Artwork URL: \(artworkUrl)")
+            }
             // Convert ResonateKit.TrackMetadata to our TrackMetadata
             let trackMetadata = TrackMetadata(
                 title: metadata.title,
                 artist: metadata.artist,
                 album: metadata.album,
-                duration: metadata.duration.map { TimeInterval($0) }
+                duration: metadata.duration.map { TimeInterval($0) },
+                artworkUrl: metadata.artworkUrl
             )
             currentMetadata = trackMetadata
             mediaControls.updateNowPlaying(metadata: trackMetadata, artwork: nil)
+
+            // Show notification for track change
+            showTrackNotification(metadata: trackMetadata)
 
         case let .artworkReceived(channel, data):
             print("🟢 ResonateManager: Artwork received on channel \(channel): \(data.count) bytes")

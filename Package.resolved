@@ -1,13 +1,31 @@
 {
-  "originHash" : "c1b9e14ab7c72c97a3f78876990671345a6914f1115cf6e0a9a4020e10a003a2",
+  "originHash" : "7ba065098fa6f4fbe44806db9471f0a59dc81ce6cbd0acffe219b5945d1918e3",
   "pins" : [
+    {
+      "identity" : "flac-binary-xcframework",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/sbooth/flac-binary-xcframework.git",
+      "state" : {
+        "revision" : "9005dc2cd455765fb6824eb215c9703429bbe8ff",
+        "version" : "0.2.0"
+      }
+    },
+    {
+      "identity" : "ogg-binary-xcframework",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/sbooth/ogg-binary-xcframework.git",
+      "state" : {
+        "revision" : "c0e822e18738ad913864e98d9614927ac1e9337c",
+        "version" : "0.1.2"
+      }
+    },
     {
       "identity" : "resonatekit",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/harperreed/ResonateKit",
       "state" : {
         "branch" : "main",
-        "revision" : "221eae181b12674150c0d7ba654d57526fa1c8e9"
+        "revision" : "e7f9c65a187ef7a6c496887fa7a702751a0c904c"
       }
     },
     {
@@ -17,6 +35,15 @@
       "state" : {
         "revision" : "c6bfd1af48efcc9a9ad203665db12375ba6b145a",
         "version" : "4.0.8"
+      }
+    },
+    {
+      "identity" : "swift-opus",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/alta/swift-opus.git",
+      "state" : {
+        "revision" : "5f0164b8915fb9001265c54413aa0f0efbd3df06",
+        "version" : "0.0.2"
       }
     }
   ],

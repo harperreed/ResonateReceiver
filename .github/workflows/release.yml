@@ -1,0 +1,155 @@
+name: Release Build
+
+on:
+    push:
+        tags:
+            - "v*"
+    workflow_dispatch: # Allow manual trigger for testing
+
+jobs:
+    build-dmg:
+        runs-on: macos-14
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Install xcodegen
+              run: brew install xcodegen
+
+            - name: Generate Xcode project
+              run: xcodegen generate
+
+            - name: Setup Xcode
+              uses: maxim-lobanov/setup-xcode@v1
+              with:
+                  xcode-version: latest-stable
+
+            - name: Run tests
+              run: swift test
+
+            - name: Import Code Signing Certificate
+              env:
+                  P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+                  CERTIFICATE_BASE64: ${{ secrets.CERTIFICATE_BASE64 }}
+              run: |
+                  # Create temporary keychain
+                  KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+                  KEYCHAIN_PASSWORD=$(openssl rand -base64 32)
+
+                  security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+                  security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+                  security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+                  # Import certificate
+                  echo "$CERTIFICATE_BASE64" | base64 --decode > certificate.p12
+                  security import certificate.p12 -k "$KEYCHAIN_PATH" -P "$P12_PASSWORD" -T /usr/bin/codesign
+                  security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+                  # Set as default keychain
+                  security list-keychains -d user -s "$KEYCHAIN_PATH"
+                  rm certificate.p12
+
+            - name: Build and sign app
+              env:
+                  TEAM_ID: ${{ secrets.TEAM_ID }}
+              run: |
+                  xcodebuild -project ResonateReceiver.xcodeproj \
+                    -scheme ResonateReceiver \
+                    -configuration Release \
+                    -derivedDataPath build \
+                    -onlyUsePackageVersionsFromResolvedFile \
+                    CODE_SIGN_IDENTITY="Developer ID Application" \
+                    DEVELOPMENT_TEAM="$TEAM_ID" \
+                    CODE_SIGN_STYLE=Manual \
+                    clean build
+
+            - name: Create DMG
+              run: ./scripts/create-dmg.sh
+
+            - name: Notarize DMG
+              env:
+                  API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+                  API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+                  API_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
+              run: |
+                  DMG_FILE=$(ls ResonateReceiver-*.dmg)
+
+                  # Write API key to temporary file
+                  echo "$API_KEY_BASE64" | base64 --decode > AuthKey.p8
+
+                  # Submit for notarization with API key and capture submission ID
+                  SUBMISSION_OUTPUT=$(xcrun notarytool submit "$DMG_FILE" \
+                    --key AuthKey.p8 \
+                    --key-id "$API_KEY_ID" \
+                    --issuer "$API_ISSUER_ID" \
+                    --wait 2>&1)
+
+                  echo "$SUBMISSION_OUTPUT"
+
+                  # Extract submission ID for potential log retrieval
+                  SUBMISSION_ID=$(echo "$SUBMISSION_OUTPUT" | grep -E 'id: [a-f0-9-]+' | head -1 | awk '{print $2}')
+                  echo "SUBMISSION_ID=$SUBMISSION_ID" >> $GITHUB_ENV
+
+                  # Staple the notarization ticket
+                  xcrun stapler staple "$DMG_FILE"
+
+                  # Clean up API key
+                  rm AuthKey.p8
+
+            - name: Retrieve notarization log on failure
+              if: failure()
+              env:
+                  API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+                  API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+                  API_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
+              run: |
+                  # Recreate API key file
+                  echo "$API_KEY_BASE64" | base64 --decode > AuthKey.p8
+
+                  # Retrieve and display the rejection log
+                  if [ -n "${{ env.SUBMISSION_ID }}" ]; then
+                    echo "Retrieving notarization log for submission: ${{ env.SUBMISSION_ID }}"
+                    xcrun notarytool log "${{ env.SUBMISSION_ID }}" \
+                      --key AuthKey.p8 \
+                      --key-id "$API_KEY_ID" \
+                      --issuer "$API_ISSUER_ID"
+                  else
+                    echo "No submission ID found - cannot retrieve log"
+                  fi
+
+                  # Clean up API key
+                  rm AuthKey.p8
+
+            - name: Upload DMG artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: ResonateReceiver-DMG
+                  path: ResonateReceiver-*.dmg
+                  retention-days: 90
+
+            - name: Create GitHub Release
+              if: startsWith(github.ref, 'refs/tags/')
+              uses: softprops/action-gh-release@v1
+              with:
+                  files: ResonateReceiver-*.dmg
+                  draft: false
+                  generate_release_notes: true
+                  body: |
+                      ## Installation
+
+                      1. Download `ResonateReceiver-*.dmg`
+                      2. Open the DMG file
+                      3. Drag Music Assistant Player to Applications folder
+                      4. Launch the app normally
+
+                      ## Requirements
+
+                      - macOS 14.0 or later
+                      - Music Assistant server (running locally or remotely)
+
+                      ---
+
+                      **Note:** This build is code signed and notarized with Developer ID.
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

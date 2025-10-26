@@ -3,17 +3,19 @@
 
 import Foundation
 
-public struct TrackMetadata: Equatable {
+public struct TrackMetadata: Equatable, Sendable {
     public let title: String?
     public let artist: String?
     public let album: String?
     public let duration: TimeInterval?
+    public let artworkUrl: String?
 
-    public init(title: String?, artist: String?, album: String?, duration: TimeInterval?) {
+    public init(title: String?, artist: String?, album: String?, duration: TimeInterval?, artworkUrl: String? = nil) {
         self.title = title
         self.artist = artist
         self.album = album
         self.duration = duration
+        self.artworkUrl = artworkUrl
     }
 
     public var displayTitle: String {
