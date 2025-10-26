@@ -8,6 +8,7 @@ import Foundation
 // XCTest is not available in the CommandLineTools SDK, so we use simple assert-based
 // tests with a manual runner. Tests are executed during build and fail the build on errors.
 
+@MainActor
 func testSaveAndLoad() {
     let manager = SettingsManager()
     let config = ServerConfig(
@@ -23,6 +24,7 @@ func testSaveAndLoad() {
     print("✓ testSaveAndLoad passed")
 }
 
+@MainActor
 func testClear() {
     let manager = SettingsManager()
     let config = ServerConfig(hostname: "test.local", port: 8080, name: nil)
@@ -35,6 +37,7 @@ func testClear() {
     print("✓ testClear passed")
 }
 
+@MainActor
 func testAutoDiscovery() {
     let manager = SettingsManager()
 
@@ -45,6 +48,7 @@ func testAutoDiscovery() {
     print("✓ testAutoDiscovery passed")
 }
 
+@MainActor
 func runSettingsManagerTests() {
     testSaveAndLoad()
     testClear()

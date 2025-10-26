@@ -10,6 +10,7 @@ import Foundation
 
 @main
 struct TestRunner {
+    @MainActor
     static func main() {
         print("Running all tests...\n")
 

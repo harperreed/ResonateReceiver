@@ -3,6 +3,7 @@
 
 import Foundation
 
+@MainActor
 public class SettingsManager: ObservableObject {
     @Published public var serverConfig: ServerConfig?
     @Published public var enableAutoDiscovery: Bool = true
