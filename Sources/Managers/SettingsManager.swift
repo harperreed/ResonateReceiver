@@ -3,9 +3,9 @@
 
 import Foundation
 
-class SettingsManager {
-    var serverConfig: ServerConfig?
-    var enableAutoDiscovery: Bool = true
+class SettingsManager: ObservableObject {
+    @Published var serverConfig: ServerConfig?
+    @Published var enableAutoDiscovery: Bool = true
 
     private let defaults = UserDefaults.standard
     private let serverConfigKey = "resonateServerConfig"
