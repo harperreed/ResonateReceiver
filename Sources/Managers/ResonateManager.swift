@@ -26,6 +26,13 @@ public class ResonateManager: ObservableObject {
     }
 
     private func showTrackNotification(metadata: TrackMetadata) {
+        // Only show notifications if we have a proper app bundle
+        // (swift run doesn't have a bundle and causes crashes)
+        guard Bundle.main.bundleIdentifier != nil else {
+            print("🟡 ResonateManager: Skipping notification (no bundle)")
+            return
+        }
+
         let center = UNUserNotificationCenter.current()
 
         // Request permission if not already requested
@@ -38,13 +45,17 @@ public class ResonateManager: ObservableObject {
                 }
                 if granted {
                     print("🟢 ResonateManager: Notification permission granted")
-                    self.postNotification(metadata: metadata)
+                    Task { @MainActor in
+                        self.postNotification(metadata: metadata)
+                    }
                 }
             }
         } else {
             center.getNotificationSettings { settings in
                 if settings.authorizationStatus == .authorized {
-                    self.postNotification(metadata: metadata)
+                    Task { @MainActor in
+                        self.postNotification(metadata: metadata)
+                    }
                 }
             }
         }
