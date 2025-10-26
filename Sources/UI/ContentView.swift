@@ -1,0 +1,143 @@
+// ABOUTME: Main popover UI showing connection status and playback info
+// ABOUTME: Displays album art, metadata, controls, and settings access
+
+import SwiftUI
+
+struct ContentView: View {
+    @ObservedObject var resonateManager: ResonateManager
+    @ObservedObject var settingsManager: SettingsManager
+    @State private var showingSettings = false
+
+    var body: some View {
+        VStack(spacing: 0) {
+            // Header
+            headerSection
+
+            Divider()
+
+            // Album art and metadata
+            if resonateManager.isConnected {
+                playbackSection
+            } else {
+                disconnectedSection
+            }
+
+            Divider()
+
+            // Controls
+            controlsSection
+
+            Divider()
+
+            // Footer
+            footerSection
+        }
+        .frame(width: 350, height: 500)
+        .sheet(isPresented: $showingSettings) {
+            SettingsView(settingsManager: settingsManager)
+        }
+    }
+
+    private var headerSection: some View {
+        HStack {
+            Image(systemName: "waveform.circle.fill")
+                .foregroundColor(.blue)
+                .font(.title2)
+            Text("Resonate Receiver")
+                .font(.headline)
+            Spacer()
+            Circle()
+                .fill(resonateManager.isConnected ? Color.green : Color.gray)
+                .frame(width: 8, height: 8)
+        }
+        .padding()
+    }
+
+    private var playbackSection: some View {
+        VStack(spacing: 16) {
+            // Album art
+            Image(systemName: "music.note")
+                .font(.system(size: 120))
+                .foregroundColor(.secondary)
+                .frame(width: 300, height: 300)
+                .background(Color.secondary.opacity(0.1))
+                .cornerRadius(8)
+
+            // Metadata
+            VStack(spacing: 4) {
+                Text(resonateManager.currentMetadata?.displayTitle ?? "Not Playing")
+                    .font(.headline)
+                    .lineLimit(2)
+
+                Text(resonateManager.currentMetadata?.displayArtist ?? "")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+
+                Text(resonateManager.currentMetadata?.displayAlbum ?? "")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            .padding(.horizontal)
+        }
+        .padding()
+    }
+
+    private var disconnectedSection: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "antenna.radiowaves.left.and.right.slash")
+                .font(.system(size: 60))
+                .foregroundColor(.secondary)
+
+            Text(resonateManager.connectionStatus)
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxHeight: .infinity)
+        .padding()
+    }
+
+    private var controlsSection: some View {
+        VStack(spacing: 12) {
+            // Volume control
+            HStack {
+                Image(systemName: resonateManager.isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
+                    .foregroundColor(.secondary)
+                    .frame(width: 24)
+                    .onTapGesture {
+                        resonateManager.toggleMute()
+                    }
+
+                Slider(
+                    value: Binding(
+                        get: { resonateManager.volume },
+                        set: { resonateManager.setVolume($0) }
+                    ),
+                    in: 0...1
+                )
+                .disabled(resonateManager.isMuted)
+
+                Text("\(Int(resonateManager.volume * 100))%")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .frame(width: 40, alignment: .trailing)
+            }
+
+            // Settings button
+            Button("Settings") {
+                showingSettings = true
+            }
+            .buttonStyle(.bordered)
+        }
+        .padding()
+    }
+
+    private var footerSection: some View {
+        Button("Quit") {
+            NSApplication.shared.terminate(nil)
+        }
+        .buttonStyle(.plain)
+        .foregroundColor(.red)
+        .padding()
+    }
+}
