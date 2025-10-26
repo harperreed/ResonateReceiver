@@ -136,8 +136,9 @@ public struct ContentView: View {
                     in: 0...1
                 )
                 .disabled(resonateManager.isMuted)
+                .opacity(resonateManager.isMuted ? 0.5 : 1.0)
 
-                Text("\(Int(resonateManager.volume * 100))%")
+                Text(resonateManager.isMuted ? "Muted" : "\(Int(resonateManager.volume * 100))%")
                     .font(.caption)
                     .foregroundColor(.secondary)
                     .frame(width: 40, alignment: .trailing)

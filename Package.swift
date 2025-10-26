@@ -30,10 +30,7 @@ let package = Package(
         .executableTarget(
             name: "ResonateReceiverTests",
             dependencies: ["ResonateReceiver"],
-            path: "Tests/Models",
-            linkerSettings: [
-                .unsafeFlags(["-Xlinker", "-no_application_extension"])
-            ]
+            path: "Tests"
         )
     ]
 )

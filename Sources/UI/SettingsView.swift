@@ -12,6 +12,7 @@ public struct SettingsView: View {
     @State private var serverName: String = ""
     @State private var enableAutoDiscovery: Bool = true
     @State private var validationError: String?
+    @State private var originalAutoDiscovery: Bool = true
 
     public init(settingsManager: SettingsManager) {
         self.settingsManager = settingsManager
@@ -62,6 +63,8 @@ public struct SettingsView: View {
             // Buttons
             HStack {
                 Button("Cancel") {
+                    // Restore original auto-discovery setting
+                    settingsManager.setAutoDiscovery(originalAutoDiscovery)
                     dismiss()
                 }
                 .keyboardShortcut(.cancelAction)
@@ -84,6 +87,7 @@ public struct SettingsView: View {
 
     private func loadSettings() {
         enableAutoDiscovery = settingsManager.enableAutoDiscovery
+        originalAutoDiscovery = settingsManager.enableAutoDiscovery
 
         if let config = settingsManager.serverConfig {
             hostname = config.hostname
