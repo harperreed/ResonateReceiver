@@ -2,6 +2,7 @@
 // ABOUTME: Configures app as accessory (menubar-only, no dock icon)
 
 import AppKit
+import ResonateReceiver
 
 class AppDelegate: NSObject, NSApplicationDelegate {
     var menuBarController: MenuBarController?

@@ -5,13 +5,13 @@ import AppKit
 import SwiftUI
 
 @MainActor
-class MenuBarController: NSObject {
+public class MenuBarController: NSObject {
     private var statusItem: NSStatusItem
     private var popover: NSPopover
     private let resonateManager: ResonateManager
     private let settingsManager: SettingsManager
 
-    override init() {
+    public override init() {
         // Create managers
         resonateManager = ResonateManager()
         settingsManager = SettingsManager()
@@ -61,7 +61,7 @@ class MenuBarController: NSObject {
         }
     }
 
-    func cleanup() {
+    public func cleanup() {
         resonateManager.disconnect()
     }
 }

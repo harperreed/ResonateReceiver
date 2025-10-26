@@ -3,15 +3,15 @@
 
 import Foundation
 
-class SettingsManager: ObservableObject {
-    @Published var serverConfig: ServerConfig?
-    @Published var enableAutoDiscovery: Bool = true
+public class SettingsManager: ObservableObject {
+    @Published public var serverConfig: ServerConfig?
+    @Published public var enableAutoDiscovery: Bool = true
 
     private let defaults = UserDefaults.standard
     private let serverConfigKey = "resonateServerConfig"
     private let autoDiscoveryKey = "resonateAutoDiscovery"
 
-    init() {
+    public init() {
         loadSettings()
     }
 
@@ -27,14 +27,14 @@ class SettingsManager: ObservableObject {
         }
     }
 
-    func saveServerConfig(_ config: ServerConfig) {
+    public func saveServerConfig(_ config: ServerConfig) {
         if let encoded = try? JSONEncoder().encode(config) {
             defaults.set(encoded, forKey: serverConfigKey)
             serverConfig = config
         }
     }
 
-    func loadServerConfig() -> ServerConfig? {
+    public func loadServerConfig() -> ServerConfig? {
         guard let data = defaults.data(forKey: serverConfigKey),
               let config = try? JSONDecoder().decode(ServerConfig.self, from: data) else {
             return nil
@@ -42,12 +42,12 @@ class SettingsManager: ObservableObject {
         return config
     }
 
-    func clearServerConfig() {
+    public func clearServerConfig() {
         defaults.removeObject(forKey: serverConfigKey)
         serverConfig = nil
     }
 
-    func setAutoDiscovery(_ enabled: Bool) {
+    public func setAutoDiscovery(_ enabled: Bool) {
         defaults.set(enabled, forKey: autoDiscoveryKey)
         enableAutoDiscovery = enabled
     }

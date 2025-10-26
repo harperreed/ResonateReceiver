@@ -3,21 +3,28 @@
 
 import Foundation
 
-struct TrackMetadata: Equatable {
-    let title: String?
-    let artist: String?
-    let album: String?
-    let duration: TimeInterval?
+public struct TrackMetadata: Equatable {
+    public let title: String?
+    public let artist: String?
+    public let album: String?
+    public let duration: TimeInterval?
 
-    var displayTitle: String {
+    public init(title: String?, artist: String?, album: String?, duration: TimeInterval?) {
+        self.title = title
+        self.artist = artist
+        self.album = album
+        self.duration = duration
+    }
+
+    public var displayTitle: String {
         title ?? "Unknown Track"
     }
 
-    var displayArtist: String {
+    public var displayArtist: String {
         artist ?? "Unknown Artist"
     }
 
-    var displayAlbum: String {
+    public var displayAlbum: String {
         album ?? "Unknown Album"
     }
 }

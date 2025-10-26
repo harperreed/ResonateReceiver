@@ -3,12 +3,17 @@
 
 import SwiftUI
 
-struct ContentView: View {
+public struct ContentView: View {
     @ObservedObject var resonateManager: ResonateManager
     @ObservedObject var settingsManager: SettingsManager
     @State private var showingSettings = false
 
-    var body: some View {
+    public init(resonateManager: ResonateManager, settingsManager: SettingsManager) {
+        self.resonateManager = resonateManager
+        self.settingsManager = settingsManager
+    }
+
+    public var body: some View {
         VStack(spacing: 0) {
             // Header
             headerSection
