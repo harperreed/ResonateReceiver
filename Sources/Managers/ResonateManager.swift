@@ -77,7 +77,7 @@ public class ResonateManager: ObservableObject {
         // Try to attach artwork if available
         if let artworkUrlString = metadata.artworkUrl,
            let artworkUrl = URL(string: artworkUrlString) {
-            Task {
+            Task { @MainActor in
                 do {
                     let (data, _) = try await URLSession.shared.data(from: artworkUrl)
                     let tempDir = FileManager.default.temporaryDirectory
@@ -103,15 +103,17 @@ public class ResonateManager: ObservableObject {
                 } catch {
                     print("🔴 ResonateManager: Failed to download artwork: \(error)")
                     // Fall back to notification without artwork
-                    self.sendNotificationWithoutArtwork(content: content)
+                    await self.sendNotificationWithoutArtwork(content: content)
                 }
             }
         } else {
-            sendNotificationWithoutArtwork(content: content)
+            Task { @MainActor in
+                await sendNotificationWithoutArtwork(content: content)
+            }
         }
     }
 
-    private func sendNotificationWithoutArtwork(content: UNMutableNotificationContent) {
+    private func sendNotificationWithoutArtwork(content: UNMutableNotificationContent) async {
         let request = UNNotificationRequest(
             identifier: UUID().uuidString,
             content: content,
@@ -250,10 +252,17 @@ public class ResonateManager: ObservableObject {
             print("🟢 ResonateManager: Group updated: \(info.groupName)")
 
         case let .metadataReceived(metadata):
-            print("🟢 ResonateManager: Metadata received: \(metadata.title ?? "unknown")")
+            print("🟢 ResonateManager: Metadata received:")
+            print("  Title: \(metadata.title ?? "nil")")
+            print("  Artist: \(metadata.artist ?? "nil")")
+            print("  Album: \(metadata.album ?? "nil")")
+            print("  Duration: \(metadata.duration.map { String($0) } ?? "nil")")
             if let artworkUrl = metadata.artworkUrl {
-                print("🟢 ResonateManager: Artwork URL: \(artworkUrl)")
+                print("  Artwork URL: \(artworkUrl)")
+            } else {
+                print("  Artwork URL: nil")
             }
+
             // Convert ResonateKit.TrackMetadata to our TrackMetadata
             let trackMetadata = TrackMetadata(
                 title: metadata.title,
@@ -262,6 +271,8 @@ public class ResonateManager: ObservableObject {
                 duration: metadata.duration.map { TimeInterval($0) },
                 artworkUrl: metadata.artworkUrl
             )
+
+            print("🟢 ResonateManager: Setting currentMetadata to: \(trackMetadata.title ?? "nil")")
             currentMetadata = trackMetadata
             mediaControls.updateNowPlaying(metadata: trackMetadata, artwork: nil)
 
