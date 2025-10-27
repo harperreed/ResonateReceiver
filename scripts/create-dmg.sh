@@ -1,9 +1,15 @@
 #!/bin/bash
 set -e
 
-# Get version from Info.plist
-VERSION=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" Info.plist)
-echo "Creating DMG for version ${VERSION}..."
+# Get version from git tag (e.g., v0.1.2 -> 0.1.2)
+# Falls back to Info.plist if no git tag is found
+if git describe --tags --exact-match 2>/dev/null; then
+    VERSION=$(git describe --tags --exact-match | sed 's/^v//')
+    echo "Creating DMG for version ${VERSION} (from git tag)..."
+else
+    VERSION=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" Info.plist)
+    echo "Creating DMG for version ${VERSION} (from Info.plist)..."
+fi
 
 # Create DMG using hdiutil
 DMG_NAME="ResonateReceiver-${VERSION}.dmg"
