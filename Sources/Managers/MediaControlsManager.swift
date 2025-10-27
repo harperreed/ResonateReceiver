@@ -22,9 +22,12 @@ public class MediaControlsManager {
         commandCenter.pauseCommand.isEnabled = false
         commandCenter.nextTrackCommand.isEnabled = false
         commandCenter.previousTrackCommand.isEnabled = false
+        print("🟢 MediaControlsManager: Remote commands configured")
     }
 
     public func updateNowPlaying(metadata: TrackMetadata, artwork: NSImage?) {
+        print("🟢 MediaControlsManager: updateNowPlaying called for: \(metadata.title ?? "nil")")
+
         var nowPlayingInfo: [String: Any] = [:]
 
         if let title = metadata.title {
@@ -51,6 +54,7 @@ public class MediaControlsManager {
         }
 
         nowPlayingCenter.nowPlayingInfo = nowPlayingInfo
+        print("🟢 MediaControlsManager: Now playing info updated successfully")
     }
 
     public func clearNowPlaying() {

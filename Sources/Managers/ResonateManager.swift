@@ -286,10 +286,15 @@ public class ResonateManager: ObservableObject {
 
             print("🟢 ResonateManager: Setting currentMetadata to: \(trackMetadata.title ?? "nil")")
             currentMetadata = trackMetadata
+
+            print("🟢 ResonateManager: About to update Now Playing...")
             mediaControls.updateNowPlaying(metadata: trackMetadata, artwork: nil)
+            print("🟢 ResonateManager: Now Playing updated successfully")
 
             // Show notification for track change
+            print("🟢 ResonateManager: About to show notification...")
             showTrackNotification(metadata: trackMetadata)
+            print("🟢 ResonateManager: Notification handling complete")
 
         case let .artworkReceived(channel, data):
             print("🟢 ResonateManager: Artwork received on channel \(channel): \(data.count) bytes")
