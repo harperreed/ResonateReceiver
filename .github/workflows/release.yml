@@ -74,8 +74,23 @@ jobs:
                       cp -R .build/release/ogg.framework ResonateReceiver.app/Contents/Frameworks/
                   fi
 
+                  # Fix rpaths in executable to find frameworks
+                  install_name_tool -add_rpath @executable_path/../Frameworks ResonateReceiver.app/Contents/MacOS/ResonateReceiver
+
+                  # Sign frameworks first
+                  if [ -d ResonateReceiver.app/Contents/Frameworks/FLAC.framework ]; then
+                      codesign --force --sign "Developer ID Application" \
+                        --options runtime \
+                        ResonateReceiver.app/Contents/Frameworks/FLAC.framework
+                  fi
+                  if [ -d ResonateReceiver.app/Contents/Frameworks/ogg.framework ]; then
+                      codesign --force --sign "Developer ID Application" \
+                        --options runtime \
+                        ResonateReceiver.app/Contents/Frameworks/ogg.framework
+                  fi
+
                   # Sign the app bundle
-                  codesign --force --deep --sign "Developer ID Application" \
+                  codesign --force --sign "Developer ID Application" \
                     --options runtime \
                     --entitlements entitlements.plist \
                     ResonateReceiver.app
