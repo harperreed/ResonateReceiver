@@ -21,8 +21,20 @@ public class ResonateManager: ObservableObject {
     private var eventTask: Task<Void, Never>?
     private var notificationPermissionRequested = false
 
+    // Persistent client ID stored in UserDefaults
+    private var clientId: String {
+        let key = "ResonateClientID"
+        if let existing = UserDefaults.standard.string(forKey: key) {
+            return existing
+        }
+        let newId = UUID().uuidString
+        UserDefaults.standard.set(newId, forKey: key)
+        return newId
+    }
+
     public init() {
         print("🟢 ResonateManager: init")
+        print("🟢 ResonateManager: Client ID: \(clientId)")
     }
 
     private func showTrackNotification(metadata: TrackMetadata) {
@@ -151,9 +163,9 @@ public class ResonateManager: ObservableObject {
                     ]
                 )
 
-                // Create client
+                // Create client with persistent ID
                 let client = ResonateClient(
-                    clientId: UUID().uuidString,
+                    clientId: self.clientId,
                     name: server.name ?? "Resonate Receiver",
                     roles: [.player, .metadata],
                     playerConfig: config
